@@ -1,0 +1,35 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "Protos/messages.proto";
+
+option csharp_namespace = "Hsr.CloudSolutions.SmartKitchen.Service.Interface";
+
+package Simulator;
+
+service SimulatorService {
+	rpc SendNotification(SendNotificationRequest) returns (google.protobuf.Empty);
+	rpc PeekCommand (PeekCommandRequest) returns (PeekCommandResponse);
+	rpc RegisterDevice (RegisterDeviceRequest) returns (google.protobuf.Empty);
+	rpc UnregisterDevice (UnregisterDeviceRequest) returns (google.protobuf.Empty);
+}
+
+message SendNotificationRequest {
+	.Messages.NotificationDto notification = 1;
+}
+
+message PeekCommandRequest {
+	.Messages.DeviceKeyDto device_key = 1;
+}
+message PeekCommandResponse {
+	oneof command {
+		.Messages.CommandDto device_command = 1;
+		.Messages.NullCommandDto null_command = 2;
+	}
+}
+message RegisterDeviceRequest {
+	.Messages.DeviceDto device = 1;
+}
+message UnregisterDeviceRequest {
+	.Messages.DeviceKeyDto device_key = 1;
+}

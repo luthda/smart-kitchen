@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="Hsr.CloudSolutions.SmartKitchen.ControlPanel.Controls.OvenControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI.Controls;assembly=SmartKitchen.UI"
+             xmlns:converters="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI.Converters;assembly=SmartKitchen.UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             Style="{StaticResource Controller}">
+    <UserControl.Resources>
+        <converters:DoorStateToColorConverter x:Key="DoorStateColorConverter"/>
+        <converters:DoorStateToSymbolConverter x:Key="DoorStateSymbolConverter"/>
+        <converters:DoubleToTemperatureConverter x:Key="TemperatureConverter"/>
+    </UserControl.Resources>
+    <Border Style="{StaticResource DeviceLayout}">
+        <StackPanel Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Oven" Style="{StaticResource DeviceHeader}"/>
+                <TextBlock Grid.Row="1" Text="{Binding Path=Id, Mode=OneWay}" Style="{StaticResource DeviceId}"/>
+                <Image Grid.Column="1" Grid.RowSpan="2" Source="../Images/oven-icon.png" Style="{StaticResource ControllerImage}"/>
+            </Grid>
+            <controls:LabeledControl Label="Door">
+                <TextBlock Style="{StaticResource Symbol}" Text="{Binding Path=Door, Mode=OneWay, Converter={StaticResource DoorStateSymbolConverter}}"
+                           Foreground="{Binding Path=Door, Mode=OneWay, Converter={StaticResource DoorStateColorConverter}}"
+                           HorizontalAlignment="Left"/>
+            </controls:LabeledControl>
+            <controls:LabeledControl Label="Temperature">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" MinWidth="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider Minimum="0" Maximum="250" Value="{Binding Path=Temperature, Mode=TwoWay, Delay=100}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Path=Temperature, Mode=OneWay, Converter={StaticResource TemperatureConverter}}" 
+                               TextAlignment="Right" FontWeight="Bold"/>
+                    <TextBlock Grid.Row="1" TextAlignment="Right" Text="current:"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Path=CurrentTemperature, Mode=OneWay, Converter={StaticResource TemperatureConverter}}"
+                               TextAlignment="Right"/>
+                </Grid>
+            </controls:LabeledControl>
+            <controls:LabeledControl Label="Emergency Shutdown">
+                <Button Height="48" Command="{Binding Path=EmergencyShutdownCommand, Mode=OneWay}">
+                    <Image Source="../Images/stop.png" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                </Button>
+            </controls:LabeledControl>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -1,0 +1,53 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Hsr.CloudSolutions.SmartKitchen.Service.Interface";
+
+package Messages;
+
+// Command
+message CommandDto {
+	string type = 1;
+	DeviceDto device_state = 2;
+}
+message NullCommandDto {}
+
+
+// Notification
+message NotificationDto {
+	string type = 1;
+	DeviceDto device_state = 2;
+}
+message NullNotificationDto {}
+
+// Device
+message DeviceDto {
+	string id = 1;
+	DeviceKeyDto key = 2;
+	oneof detail {
+		FridgeDetailDto fridge = 101;
+		OvenDetailDto oven = 102;
+		StoveDetailDto stove = 103;
+	}
+}
+message DeviceKeyDto {
+	string type = 1;
+	string id = 2;
+}
+
+message FridgeDetailDto {
+	double temperature = 1;
+	DoorStateDto door = 2;
+}
+message OvenDetailDto {
+	double temperature = 1;
+	DoorStateDto door = 2;
+}
+message StoveDetailDto {
+	double temperature = 1;
+	bool has_pan = 2;
+}
+enum DoorStateDto {
+	CLOSED = 0;
+	OPEN = 1;
+}
+

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<RootNamespace>Hsr.CloudSolutions.SmartKitchen.ControlPanel</RootNamespace>
+		<OutputType>WinExe</OutputType>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SmartKitchen.Service.Interface\SmartKitchen.Service.Interface.csproj" />
+		<ProjectReference Include="..\SmartKitchen.Service.Utils\SmartKitchen.Service.Utils.csproj" />
+		<ProjectReference Include="..\SmartKitchen.UI\SmartKitchen.UI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<!-- Resources -->
+		<Resource Include="Images\*" />
+		<Content Include="..\appsettings.json" Link="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+		<Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DependentUpon="Resources.resx" DesignTime="True" />
+
+		<!-- Settings -->
+		<None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
+		<Compile Update="Properties\Settings.Designer.cs" AutoGen="True" DependentUpon="Settings.settings" />
+
+	</ItemGroup>
+
+</Project>

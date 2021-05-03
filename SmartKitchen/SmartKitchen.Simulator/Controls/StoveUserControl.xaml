@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="Hsr.CloudSolutions.SmartKitchen.Simulator.Controls.StoveUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Hsr.CloudSolutions.SmartKitchen.Simulator.Controls"
+             xmlns:controls="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI.Controls;assembly=SmartKitchen.UI"
+             xmlns:converters="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI.Converters;assembly=SmartKitchen.UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <converters:DoubleToTemperatureConverter x:Key="TemperatureConverter"/>
+    </UserControl.Resources>
+    <Grid>
+       <Rectangle Fill="Snow" Opacity=".3"/>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" DataContext="{Binding Path=Device, Mode=OneWay}">
+            <TextBlock Text="{Binding Path=Label, Mode=OneWay}" Style="{StaticResource DeviceHeader}"/>
+            <TextBlock Height="5"/>
+            <StackPanel Orientation="Horizontal">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <controls:LabeledControl Label="Curr. Temp." Style="{StaticResource Label}">
+                        <TextBox Text="{Binding Path=Temperature, Mode=OneWay, Converter={StaticResource TemperatureConverter}}" 
+                        TextAlignment="Center" IsReadOnly="True"/>
+                    </controls:LabeledControl>
+                <controls:LabeledControl Grid.Column="1" Label="Target Temp." Style="{StaticResource Label}">
+                    <TextBox Text="{Binding Path=TargetTemperature, Mode=OneWay, Converter={StaticResource TemperatureConverter}}" 
+                        TextAlignment="Center" IsReadOnly="True"
+                             IsEnabled="{Binding Path=HasPan, Mode=OneWay}"/>
+                </controls:LabeledControl>
+            </Grid>
+            <TextBlock Width="15"/>
+            <controls:LabeledControl Label="Pan" Style="{StaticResource Label}">
+                <StackPanel Orientation="Horizontal" Margin="0, 2">
+                    <StackPanel.Resources>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Margin" Value="10,0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                        <ToggleButton IsChecked="{Binding Path=HasPan, Mode=TwoWay}" Width="42" Height="42">
+                            <Image Source="../Images/Pan.png" />
+                        </ToggleButton>
+                    </StackPanel>
+            </controls:LabeledControl>
+            </StackPanel>
+        </StackPanel> 
+    </Grid>
+</UserControl>

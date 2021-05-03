@@ -1,0 +1,32 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "Protos/messages.proto";
+
+option csharp_namespace = "Hsr.CloudSolutions.SmartKitchen.Service.Interface";
+
+package ControlPanel;
+
+service ControlPanelService {
+	rpc SendCommand (SendCommandRequest) returns (google.protobuf.Empty);
+	rpc PeekNotification (PeekNotificationRequest) returns (PeekNotificationResponse);
+	rpc GetRegisteredDevices (google.protobuf.Empty) returns (RegisteredDevicesResponse);
+}
+
+message SendCommandRequest {
+	.Messages.CommandDto command = 1;
+}
+
+message PeekNotificationRequest {
+	.Messages.DeviceKeyDto device_key = 1;
+}
+message PeekNotificationResponse {
+	oneof notification {
+		.Messages.NotificationDto device_notification = 1;
+		.Messages.NullNotificationDto null_notification = 2;
+	}
+}
+
+message RegisteredDevicesResponse {
+	repeated .Messages.DeviceDto devices = 1;
+}

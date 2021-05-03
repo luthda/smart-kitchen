@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<AssemblyName>SmartKitchen.Service.Interface</AssemblyName>
+		<RootNamespace>Hsr.CloudSolutions.SmartKitchen.Service.Interface</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Protos\control_panel_service.proto" />
+		<None Remove="Protos\messages.proto" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos\control_panel_service.proto" GrpcServices="Both" />
+		<Protobuf Include="Protos\messages.proto" GrpcServices="Server" />
+		<Protobuf Include="Protos\simulator_service.proto" GrpcServices="Both" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.27.0" />
+	</ItemGroup>
+
+</Project>

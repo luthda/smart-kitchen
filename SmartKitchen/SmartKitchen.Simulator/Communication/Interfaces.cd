@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Interface Name="Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.ISimulatorDataClient&lt;T&gt;">
+    <Position X="4" Y="1.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAACAAAQAAAAAAAAA=</HashCode>
+      <FileName>Communication\ISimulatorDataClient.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.ISimulatorMessageClient&lt;T&gt;">
+    <Position X="6.75" Y="1.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAAACAAAAAAAAAAACAAAAAAAAAAAAA=</HashCode>
+      <FileName>Communication\ISimulatorMessageClient.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

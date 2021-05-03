@@ -1,0 +1,34 @@
+﻿<Window x:Class="Hsr.CloudSolutions.SmartKitchen.Simulator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:Hsr.CloudSolutions.SmartKitchen.Simulator.Controls"
+        xmlns:ui="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI;assembly=SmartKitchen.UI"
+        xmlns:templates="clr-namespace:Hsr.CloudSolutions.SmartKitchen.UI.Templates;assembly=SmartKitchen.UI"
+        xmlns:devices="clr-namespace:Hsr.CloudSolutions.SmartKitchen.Simulator.Common.Devices;assembly=SmartKitchen.Simulator.Common"
+        xmlns:devices1="clr-namespace:Hsr.CloudSolutions.SmartKitchen.Simulator.Common.Devices;assembly=SmartKitchen.Simulator.Common"
+        xmlns:devices2="clr-namespace:Hsr.CloudSolutions.SmartKitchen.Simulator.Common.Devices;assembly=SmartKitchen.Simulator.Common"
+        mc:Ignorable="d"
+        Title="SmartKitchen - Simulator" 
+        Height="555" Width="1200"
+        MinHeight="555" MinWidth="1200">
+    <Grid>
+        <controls:SimulatorControl DataContext="{Binding Path=Devices, Mode=OneWay}" SimulatorBackground="Images/Kitchen.jpg">
+            <templates:DynamicDataTypeBasedTemplateSelector>
+                <DataTemplate DataType="{x:Type devices:SimFridge}">
+                    <controls:FridgeUserControl/>
+                </DataTemplate>
+                
+                <DataTemplate DataType="{x:Type devices1:SimOven}">
+                    <controls:OvenUserControl />
+                </DataTemplate>
+                
+                <DataTemplate DataType="{x:Type devices2:SimStove}">
+                    <controls:StoveUserControl />
+                </DataTemplate>
+            </templates:DynamicDataTypeBasedTemplateSelector>
+        </controls:SimulatorControl>
+    </Grid>
+</Window>
+
