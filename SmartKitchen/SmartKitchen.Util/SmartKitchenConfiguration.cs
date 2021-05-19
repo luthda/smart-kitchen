@@ -10,6 +10,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Util
         public string GrpcHostAddress { get; set; }
         public string StorageConnectionString { get; set; }
         public string ServicesBusConnectionString { get; set; }
+        public string TopicName { get; set; }
     }
 
     public static class SmartKitchenConfigurationExtensions
