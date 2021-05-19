@@ -11,9 +11,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
     /// This class is used to send commands to devices and for receiving their notifications.
     /// </summary>
     /// <typeparam name="T">The type of DeviceBase this client is used for.</typeparam>
-    public class AzureControlPanelMessageClient<T> 
+    public class AzureControlPanelMessageClient<T>
         : ClientBase
-        , IControlPanelMessageClient<T>
+            , IControlPanelMessageClient<T>
         where T : DeviceBase
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.

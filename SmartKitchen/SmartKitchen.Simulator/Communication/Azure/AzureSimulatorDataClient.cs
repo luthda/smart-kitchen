@@ -10,9 +10,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     /// This class is used for registration and deregistration of devices.
     /// </summary>
     /// <typeparam name="T">The device this client is used for.</typeparam>
-    public class AzureSimulatorDataClient<T> 
+    public class AzureSimulatorDataClient<T>
         : ClientBase
-        , ISimulatorDataClient<T>
+            , ISimulatorDataClient<T>
         where T : DeviceBase
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.

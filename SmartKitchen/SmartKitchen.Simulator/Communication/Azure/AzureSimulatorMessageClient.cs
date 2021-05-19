@@ -11,9 +11,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     /// This class is used to receive commands and send notifications.
     /// </summary>
     /// <typeparam name="T">The device this client is used for.</typeparam>
-    public class AzureSimulatorMessageClient<T> 
+    public class AzureSimulatorMessageClient<T>
         : ClientBase
-        , ISimulatorMessageClient<T>
+            , ISimulatorMessageClient<T>
         where T : DeviceBase
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
