@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 {
@@ -17,6 +19,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
+        private CloudStorageAccount _cloudStorageAccount;
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -29,9 +32,19 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <summary>
         /// Establishes the connections used to talk to the Cloud.
         /// </summary>
-        public Task InitAsync()
+        public async Task InitAsync()
         {
-            throw new System.NotImplementedException();
+            await Task.Run(() => {
+                try
+                {
+                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
+                    throw;
+                }
+            });
         }
 
         /// <summary>
