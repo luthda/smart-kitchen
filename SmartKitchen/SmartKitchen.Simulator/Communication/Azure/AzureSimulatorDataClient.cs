@@ -77,7 +77,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             if (!await cloudTable.ExistsAsync())
             {
                 await cloudTable.CreateAsync();
-            }s
+            }
 
             return cloudTable;
         }
