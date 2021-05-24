@@ -19,8 +19,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
-        private CloudStorageAccount cloudStorageAccount;
-        private const string TABLE_NAME = "smartdevices";
+        private CloudStorageAccount _cloudStorageAccount;
+        private const string TableName = "smartdevices";
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -39,7 +39,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             {
                 try
                 {
-                    cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
+                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
                 }
                 catch (Exception)
                 {
@@ -56,10 +56,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device to register.</param>
         public async Task RegisterDeviceAsync(T device)
         {
-            var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var table = tableClient.GetTableReference(TABLE_NAME);
-            await CreateTable(table);
-            await table.ExecuteAsync(TableOperation.InsertOrReplace(device as ITableEntity));
+            var cloudTable = await CreateCloudTable();
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device as ITableEntity));
         }
 
         /// <summary>
@@ -68,17 +66,20 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device to deregister.</param>
         public async Task UnregisterDeviceAsync(T device)
         {
-            var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var table = tableClient.GetTableReference(TABLE_NAME);
-            await table.ExecuteAsync(TableOperation.Delete(device as ITableEntity));
+            var cloudTable = await CreateCloudTable();
+            await cloudTable.ExecuteAsync(TableOperation.Delete(device as ITableEntity));
         }
 
-        private async Task CreateTable(CloudTable table)
+        private async Task<CloudTable> CreateCloudTable()
         {
-            if (!await table.ExistsAsync())
+            var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var cloudTable = tableClient.GetTableReference(TableName);
+            if (!await cloudTable.ExistsAsync())
             {
-                await table.CreateAsync();
-            }
+                await cloudTable.CreateAsync();
+            }s
+
+            return cloudTable;
         }
 
         /// <summary>
