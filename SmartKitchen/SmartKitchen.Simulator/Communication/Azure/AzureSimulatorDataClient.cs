@@ -35,14 +35,16 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// </summary>
         public async Task InitAsync()
         {
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 try
                 {
                     cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
+                    Console.WriteLine(
+                        "Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
                     throw;
                 }
             });
@@ -55,29 +57,28 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         public async Task RegisterDeviceAsync(T device)
         {
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            CloudTable table = tableClient.GetTableReference(TABLE_NAME);
-            if (await table.CreateIfNotExistsAsync())
-            {
-                Console.WriteLine("Created Table named: {0}", TABLE_NAME);
-            }
-            else
-            {
-                Console.WriteLine("Table {0} already exists", TABLE_NAME);
-            }
-
-            var tableOperation = TableOperation.InsertOrReplace(device as ITableEntity);
-            await table.ExecuteAsync(tableOperation);
-
-
+            var table = tableClient.GetTableReference(TABLE_NAME);
+            await CreateTable(table);
+            await table.ExecuteAsync(TableOperation.InsertOrReplace(device as ITableEntity));
         }
 
         /// <summary>
         /// Deregisters a <paramref name="device"/> to no longer be used with the control panel.
         /// </summary>
         /// <param name="device">The device to deregister.</param>
-        public Task UnregisterDeviceAsync(T device)
+        public async Task UnregisterDeviceAsync(T device)
         {
-            throw new System.NotImplementedException();
+            var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var table = tableClient.GetTableReference(TABLE_NAME);
+            await table.ExecuteAsync(TableOperation.Delete(device as ITableEntity));
+        }
+
+        private async Task CreateTable(CloudTable table)
+        {
+            if (!await table.ExistsAsync())
+            {
+                await table.CreateAsync();
+            }
         }
 
         /// <summary>
@@ -86,11 +87,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         protected override void OnDispose()
         {
             base.OnDispose();
-        }
-
-        private async Task CreateTable(string tableName)
-        {
-
         }
     }
 }
