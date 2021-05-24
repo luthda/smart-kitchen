@@ -19,7 +19,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
-        private CloudStorageAccount _cloudStorageAccount;
+        private CloudStorageAccount cloudStorageAccount;
+        private const string TABLE_NAME = "smartdevices";
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -37,7 +38,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             await Task.Run(() => {
                 try
                 {
-                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
+                    cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
                 }
                 catch (Exception)
                 {
@@ -51,9 +52,23 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// Registers a <paramref name="device"/> to be used with the control panel.
         /// </summary>
         /// <param name="device">The device to register.</param>
-        public Task RegisterDeviceAsync(T device)
+        public async Task RegisterDeviceAsync(T device)
         {
-            throw new System.NotImplementedException();
+            var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            CloudTable table = tableClient.GetTableReference(TABLE_NAME);
+            if (await table.CreateIfNotExistsAsync())
+            {
+                Console.WriteLine("Created Table named: {0}", TABLE_NAME);
+            }
+            else
+            {
+                Console.WriteLine("Table {0} already exists", TABLE_NAME);
+            }
+
+            var tableOperation = TableOperation.InsertOrReplace(device as ITableEntity);
+            await table.ExecuteAsync(tableOperation);
+
+
         }
 
         /// <summary>
@@ -71,6 +86,11 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         protected override void OnDispose()
         {
             base.OnDispose();
+        }
+
+        private async Task CreateTable(string tableName)
+        {
+
         }
     }
 }
