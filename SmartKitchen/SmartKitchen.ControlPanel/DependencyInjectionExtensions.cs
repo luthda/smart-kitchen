@@ -1,5 +1,6 @@
 ﻿using System;
 using Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication;
+using Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure;
 using Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Grpc;
 using Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
@@ -37,14 +38,14 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel
         {
             // TODO: Bind here!!!
             // If Azure support is implemented, comment this type registration since it's no longer needed
-            services.AddTransient<IControlPanelDataClient, GrpcControlPanelDataClient>();
+            // services.AddTransient<IControlPanelDataClient, GrpcControlPanelDataClient>();
             services.AddTransient(typeof(IControlPanelMessageClient<>), typeof(GrpcControlPanelMessageClient<>));
 
             // TODO: To support Azure, uncomment this type registration
             // Simulator Data Client
             // To support Azure, uncomment this type registration
             //services.AddTransient(typeof(IControlPanelDataClient), typeof(BlobControlPanelDataClient));
-            //services.AddTransient(typeof(IControlPanelDataClient), typeof(TableControlPanelDataClient));
+            services.AddTransient(typeof(IControlPanelDataClient), typeof(AzureControlPanelDataClient));
 
             // Simulator Device Client
             //services.AddTransient(typeof(IControlPanelMessageClient<>), typeof(ServiceBusTopicControlPanelMessageClient<>));
