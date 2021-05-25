@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
@@ -16,6 +19,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
+        private CloudStorageAccount _cloudStorageAccount;
+        private const string TableName = "smartdevices";
 
         public AzureControlPanelDataClient(
             IDialogService dialogService,
@@ -28,18 +33,42 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <summary>
         /// Used to establish the communication.
         /// </summary>
-        public Task InitAsync()
+        public async Task InitAsync()
         {
-            throw new System.NotImplementedException();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine(
+                        "Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
+                    throw;
+                }
+            });
         }
 
         /// <summary>
         /// Loads the registerd devices from the simulator.
         /// </summary>
         /// <returns>The list of all known devices.</returns>
-        public Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
+        public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
-            throw new System.NotImplementedException();
+            var cloudTable = await GetCloudTable();
+            var tableQuery = new TableQuery<DeviceBase>();
+
+            return cloudTable.ExecuteQuery(tableQuery);
+        }
+
+        private async Task<CloudTable> GetCloudTable()
+        {
+            var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var cloudTable = tableClient.GetTableReference(TableName);
+            await cloudTable.CreateIfNotExistsAsync();
+
+            return cloudTable;
         }
 
         /// <summary>

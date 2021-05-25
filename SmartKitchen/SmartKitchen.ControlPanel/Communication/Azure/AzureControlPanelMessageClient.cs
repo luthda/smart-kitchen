@@ -4,6 +4,7 @@ using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
+using Microsoft.Azure.ServiceBus;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
@@ -18,6 +19,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
+        private TopicClient _smartTopicClient;
+        private SubscriptionClient _notificationSubscriptionClient;
 
         public AzureControlPanelMessageClient(
             IDialogService dialogService,
@@ -31,10 +34,15 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// Used to establish the communication.
         /// </summary>
         /// <param name="device">The device this client is responsible for.</param>
-        public Task InitAsync(T device)
+        public async Task InitAsync(T device)
         {
+            await Task.Run((() =>
+            {
+                _notificationSubscriptionClient =
+                    new SubscriptionClient(_config.ServicesBusConnectionString, _config.TopicName, "notifications");
+                _smartTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.TopicName);
+            }));
             IsInitialized = true;
-            throw new System.NotImplementedException();
         }
 
         /// <summary>

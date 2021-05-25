@@ -4,6 +4,7 @@ using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
+using Microsoft.Azure.ServiceBus;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 {
@@ -18,6 +19,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
+        private TopicClient _smartTopicClient;
+        private SubscriptionClient _commandSubscriptionClient;
 
         public AzureSimulatorMessageClient(
             IDialogService dialogService,
@@ -31,9 +34,14 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// Establishes the connections used to talk to the Cloud.
         /// </summary>
         /// <param name="device">The device this client is used for.</param>
-        public Task InitAsync(T device)
+        public async Task InitAsync(T device)
         {
-            throw new System.NotImplementedException();
+            await Task.Run((() =>
+            {
+                _commandSubscriptionClient =
+                    new SubscriptionClient(_config.ServicesBusConnectionString, _config.TopicName, "commands");
+                _smartTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.TopicName);
+            }));
         }
 
         /// <summary>
