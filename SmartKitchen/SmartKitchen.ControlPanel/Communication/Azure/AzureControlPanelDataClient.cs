@@ -57,9 +57,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
             var cloudTable = await GetCloudTable();
-            var tableQuery = new TableQuery<DeviceBase>();
+            var tableQuery = new TableQuery<DeviceStorageAdapter>();
 
-            return cloudTable.ExecuteQuery(tableQuery);
+            return cloudTable.ExecuteQuery(tableQuery)
+                .Select(deviceStorageAdapter => deviceStorageAdapter.ToDevice());
         }
 
         private async Task<CloudTable> GetCloudTable()

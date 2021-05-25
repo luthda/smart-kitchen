@@ -59,7 +59,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             if (device == null) throw new ArgumentNullException(nameof(device));
             
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device));
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceStorageAdapter(device)));
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             if (device == null) throw new ArgumentNullException(nameof(device));
             
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.Delete(device));
+            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceStorageAdapter(device)));
         }
 
         private async Task<CloudTable> GetCloudTable()
