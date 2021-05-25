@@ -65,7 +65,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <returns>A received notification or NullNotification&lt;T&gt;</returns>
         public async Task<INotification<T>> CheckNotificationsAsync(T device)
         {
-            if (device == null) return await Task.Run(() => NullNotification<T>.Empty);
+            if (device == null) return NullNotification<T>.Empty;
 
             return await Task.Run(() => _notification);
         }
@@ -76,6 +76,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <param name="command">Command to send</param>
         public async Task SendCommandAsync(ICommand<T> command)
         {
+            if (command == null) return;
+
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(command)))
             {
                 ContentType = "application/json",
