@@ -56,8 +56,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device to register.</param>
         public async Task RegisterDeviceAsync(T device)
         {
+            if (device == null) throw new ArgumentNullException(nameof(device));
+            
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device as ITableEntity));
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device));
         }
 
         /// <summary>
@@ -66,18 +68,17 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device to deregister.</param>
         public async Task UnregisterDeviceAsync(T device)
         {
+            if (device == null) throw new ArgumentNullException(nameof(device));
+            
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.Delete(device as ITableEntity));
+            await cloudTable.ExecuteAsync(TableOperation.Delete(device));
         }
 
         private async Task<CloudTable> GetCloudTable()
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
-            if (!await cloudTable.ExistsAsync())
-            {
-                await cloudTable.CreateAsync();
-            }
+            await cloudTable.CreateIfNotExistsAsync();
 
             return cloudTable;
         }
