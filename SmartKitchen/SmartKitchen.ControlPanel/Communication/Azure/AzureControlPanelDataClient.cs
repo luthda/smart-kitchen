@@ -10,12 +10,9 @@ using Microsoft.Azure.Cosmos.Table;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
-    /// <summary>
-    /// This class is used to receive the registered devices.
-    /// </summary>
-    public class AzureControlPanelDataClient 
+    public class AzureControlPanelDataClient
         : ClientBase
-        , IControlPanelDataClient
+            , IControlPanelDataClient
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
@@ -30,9 +27,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Used to establish the communication.
-        /// </summary>
         public async Task InitAsync()
         {
             await Task.Run(() =>
@@ -50,10 +44,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Loads the registerd devices from the simulator.
-        /// </summary>
-        /// <returns>The list of all known devices.</returns>
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
             var cloudTable = await GetCloudTable();
@@ -72,9 +62,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             return cloudTable;
         }
 
-        /// <summary>
-        /// Use this method to tear down any established connections.
-        /// </summary>
         protected override void OnDispose()
         {
             base.OnDispose();
