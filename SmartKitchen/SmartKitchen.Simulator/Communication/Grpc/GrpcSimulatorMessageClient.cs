@@ -88,5 +88,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Grpc
                 LogException("Closing Channel failed.", ex);
             }
         }
+
+        public IDisposable Subscribe(IObserver<ICommand<T>> observer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

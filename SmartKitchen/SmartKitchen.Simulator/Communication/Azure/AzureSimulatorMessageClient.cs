@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
@@ -28,6 +29,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         private SubscriptionClient _commandSubscriptionClient;
         private ICommand<T> _command;
         private string _subscriptionName;
+        private readonly List<IObserver<ICommand<T>>> _observers = new List<IObserver<ICommand<T>>>();
 
         public AzureSimulatorMessageClient(
             IDialogService dialogService,
@@ -58,7 +60,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <returns>A received command or NullCommandDto&lt;T&gt;</returns>
         public async Task<ICommand<T>> CheckCommandsAsync(T device)
         {
-            if (device == null) return NullCommand<T>.Empty;
+            if (device == null || _command == null) return NullCommand<T>.Empty;
 
             return await Task.Run(() => _command);
         }
@@ -76,7 +78,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
                 ContentType = "application/json",
                 Label = "notification"
             };
-
             await _notificationTopicClient.SendAsync(message);
         }
 
@@ -102,6 +103,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
                 {
                     var body = message.Body;
                     _command = JsonConvert.DeserializeObject<DeviceCommand<T>>(Encoding.UTF8.GetString(body));
+                    foreach (var observer in _observers)
+                    {
+                        observer.OnNext(_command);
+                    }
                     await _commandSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
@@ -111,13 +116,26 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             });
         }
 
+        public void Unsubscribe(IObserver<ICommand<T>> observer)
+        {
+            _observers.Remove(observer);
+        }
+
         /// <summary>
         /// Use this method to tear down established connections.
         /// </summary>
         protected override async void OnDispose()
         {
+            await _notificationTopicClient.CloseAsync();
             await _commandSubscriptionClient.CloseAsync();
+            await _subscriptionManagementClient.CloseAsync();
             base.OnDispose();
+        }
+
+        public IDisposable Subscribe(IObserver<ICommand<T>> observer)
+        {
+            _observers.Add(observer);
+            return null;
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <returns>A received notification or NullNotification&lt;T&gt;</returns>
         public async Task<INotification<T>> CheckNotificationsAsync(T device)
         {
-            if (device == null) return NullNotification<T>.Empty;
+            if (device == null || _notification == null) return NullNotification<T>.Empty;
 
             return await Task.Run(() => _notification);
         }
@@ -90,7 +90,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         {
             _subscriptionManagementClient = new ManagementClient(_config.ServicesBusConnectionString);
 
-            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic, _subscriptionName))
+            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic,
+                _subscriptionName))
             {
                 var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName);
                 await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
@@ -122,8 +123,15 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// </summary>
         protected override async void OnDispose()
         {
+            await _commandTopicClient.CloseAsync();
+            await _notificationSubscriptionClient.CloseAsync();
             await _subscriptionManagementClient.CloseAsync();
             base.OnDispose();
+        }
+
+        public IDisposable Subscribe(IObserver<INotification<T>> observer)
+        {
+            throw new NotImplementedException();
         }
     }
 }
