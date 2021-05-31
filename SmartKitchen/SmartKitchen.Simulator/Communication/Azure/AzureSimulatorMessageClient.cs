@@ -76,7 +76,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(notification)))
             {
                 ContentType = "application/json",
-                Label = $"notification_{notification.DeviceState.Key}"
+                Label = "notification"
             };
 
             await _notificationTopicClient.SendAsync(message);
@@ -99,7 +99,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals(_subscriptionName, StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals("command", StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;
