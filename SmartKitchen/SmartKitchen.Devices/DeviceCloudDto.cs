@@ -12,6 +12,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
 
         public string JsonObject { get; set; }
 
+        public DeviceCloudDto()
+        {
+        }
+
         public DeviceCloudDto(DeviceBase device)
         {
             JsonObject = JsonConvert.SerializeObject(device, _jsonSettings);
