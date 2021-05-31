@@ -107,6 +107,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
                     {
                         observer.OnNext(_command);
                     }
+
                     await _commandSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
@@ -114,11 +115,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
                 AutoComplete = false,
                 MaxConcurrentCalls = 1
             });
-        }
-
-        public void Unsubscribe(IObserver<ICommand<T>> observer)
-        {
-            _observers.Remove(observer);
         }
 
         /// <summary>
@@ -135,7 +131,27 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         public IDisposable Subscribe(IObserver<ICommand<T>> observer)
         {
             _observers.Add(observer);
-            return null;
+            return new Unsubscriber(_observers, observer);
+        }
+
+
+        private class Unsubscriber : IDisposable
+        {
+            private IList<IObserver<ICommand<T>>> _observers;
+            private IObserver<ICommand<T>> _observer;
+
+            public Unsubscriber
+                (IList<IObserver<ICommand<T>>> observers, IObserver<ICommand<T>> observer)
+            {
+                _observers = observers;
+                _observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (_observer != null && _observers.Contains(_observer))
+                    _observers.Remove(_observer);
+            }
         }
     }
 }

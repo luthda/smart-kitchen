@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Protobuf.Reflection;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;
@@ -28,6 +30,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private SubscriptionClient _notificationSubscriptionClient;
         private INotification<T> _notification;
         private string _subscriptionName;
+        private readonly IList<IObserver<INotification<T>>> _observers = new List<IObserver<INotification<T>>>();
 
         public AzureControlPanelMessageClient(
             IDialogService dialogService,
@@ -109,6 +112,11 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
                 {
                     var body = message.Body;
                     _notification = JsonConvert.DeserializeObject<DeviceNotification<T>>(Encoding.UTF8.GetString(body));
+                    foreach (var observer in _observers)
+                    {
+                        observer.OnNext(_notification);
+                    }
+
                     await _notificationSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
@@ -131,7 +139,31 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 
         public IDisposable Subscribe(IObserver<INotification<T>> observer)
         {
-            throw new NotImplementedException();
+            if (!_observers.Contains(observer))
+            {
+                _observers.Add(observer);
+            }
+
+            return new Unsubscriber(_observers, observer);
+        }
+
+        private class Unsubscriber : IDisposable
+        {
+            private IList<IObserver<INotification<T>>> _observers;
+            private IObserver<INotification<T>> _observer;
+
+            public Unsubscriber
+                (IList<IObserver<INotification<T>>> observers, IObserver<INotification<T>> observer)
+            {
+                _observers = observers;
+                _observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (_observer != null && _observers.Contains(_observer))
+                    _observers.Remove(_observer);
+            }
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
-using Hsr.CloudSolutions.SmartKitchen.Simulator.Devices;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication
 {

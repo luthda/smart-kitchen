@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
@@ -18,6 +17,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
         {
             _client = client;
             _cast = cast;
+
+            _client.Subscribe(this);
         }
 
         protected T Cast(DeviceBase device)
@@ -87,6 +88,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             await _client.SendCommandAsync(deviceCommand);
         }
 
+
         public void Update(T update)
         {
             if (!IsControllerFor(update))
@@ -124,9 +126,13 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             throw new NotImplementedException();
         }
 
-        public void OnNext(INotification<T> value)
+        public void OnNext(INotification<T> notification)
         {
-            throw new NotImplementedException();
+            if (notification is NullNotification<T> || !notification.HasDeviceInfo)
+            {
+                return;
+            }
+            Update(notification.DeviceState);
         }
     }
 }
