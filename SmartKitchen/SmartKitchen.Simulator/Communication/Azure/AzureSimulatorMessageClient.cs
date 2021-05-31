@@ -76,7 +76,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(notification)))
             {
                 ContentType = "application/json",
-                Label = "notification"
+                Label = $"notification_{_subscriptionName}"
             };
             await _notificationTopicClient.SendAsync(message);
         }
@@ -87,8 +87,13 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 
             if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.CommandTopic, _subscriptionName))
             {
-                var subscription = new SubscriptionDescription(_config.CommandTopic, _subscriptionName);
-                await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
+                var rule = new RuleDescription("DeviceFilter", new SqlFilter($"sys.Label = 'command_{_subscriptionName}'"));
+                var subscription = new SubscriptionDescription(_config.CommandTopic, _subscriptionName)
+                {
+                    DefaultMessageTimeToLive = new TimeSpan(1, 0, 0, 0),
+                    MaxDeliveryCount = 100
+                };
+                await _subscriptionManagementClient.CreateSubscriptionAsync(subscription, rule);
             }
         }
 
@@ -98,17 +103,23 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals("command", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals($"command_{_subscriptionName}", StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;
                     _command = JsonConvert.DeserializeObject<DeviceCommand<T>>(Encoding.UTF8.GetString(body));
+
                     foreach (var observer in _observers)
                     {
                         observer.OnNext(_command);
                     }
 
                     await _commandSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+                }
+                else
+                {
+                    await _commandSubscriptionClient.DeadLetterAsync(message.SystemProperties.LockToken,
+                        "ProcessingError", "Don't know what to do");
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
             {

@@ -83,7 +83,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(command)))
             {
                 ContentType = "application/json",
-                Label = "command"
+                Label = $"command_{_subscriptionName}"
             };
 
             await _commandTopicClient.SendAsync(message);
@@ -96,8 +96,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic,
                 _subscriptionName))
             {
-                var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName);
-                await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
+                var rule = new RuleDescription("DeviceFilter", new SqlFilter($"sys.Label = 'notification_{_subscriptionName}'"));
+                var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName)
+                {
+                    DefaultMessageTimeToLive = new TimeSpan(1, 0, 0, 0), MaxDeliveryCount = 100
+                };
+                await _subscriptionManagementClient.CreateSubscriptionAsync(subscription, rule);
             }
         }
 
@@ -107,17 +111,23 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals("notification", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals($"notification_{_subscriptionName}", StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;
                     _notification = JsonConvert.DeserializeObject<DeviceNotification<T>>(Encoding.UTF8.GetString(body));
+
                     foreach (var observer in _observers)
                     {
                         observer.OnNext(_notification);
                     }
 
                     await _notificationSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+                }
+                else
+                {
+                    await _notificationSubscriptionClient.DeadLetterAsync(message.SystemProperties.LockToken,
+                        "ProcessingError", "Don't know what to do");
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
             {
