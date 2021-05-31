@@ -27,8 +27,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private ManagementClient _subscriptionManagementClient;
         private SubscriptionClient _notificationSubscriptionClient;
         private INotification<T> _notification;
-        private const string CommandTopic = "commandtopic";
-        private const string NotificationTopic = "notificationtopic";
         private string _subscriptionName;
 
         public AzureControlPanelMessageClient(
@@ -45,10 +43,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <param name="device">The device this client is responsible for.</param>
         public async Task InitAsync(T device)
         {
-            _subscriptionName = $"notification_{device.Key}";
-            _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, CommandTopic);
+            _subscriptionName = device.Key.ToString();
+            _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.CommandTopic);
             _notificationSubscriptionClient = new SubscriptionClient(_config.ServicesBusConnectionString,
-                NotificationTopic, _subscriptionName);
+                _config.NotificationTopic, _subscriptionName);
             await InitializeSubscription();
             InitializeReceiver();
             IsInitialized = true;
@@ -92,9 +90,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         {
             _subscriptionManagementClient = new ManagementClient(_config.ServicesBusConnectionString);
 
-            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(NotificationTopic, _subscriptionName))
+            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic, _subscriptionName))
             {
-                var subscription = new SubscriptionDescription(NotificationTopic, _subscriptionName);
+                var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName);
                 await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
             }
         }

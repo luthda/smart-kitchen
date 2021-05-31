@@ -27,8 +27,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         private ManagementClient _subscriptionManagementClient;
         private SubscriptionClient _commandSubscriptionClient;
         private ICommand<T> _command;
-        private const string CommandTopic = "commandtopic";
-        private const string NotificationTopic = "notificationtopic";
         private string _subscriptionName;
 
         public AzureSimulatorMessageClient(
@@ -45,10 +43,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device this client is used for.</param>
         public async Task InitAsync(T device)
         {
-            _subscriptionName = $"command_{device.Key}";
-            _notificationTopicClient = new TopicClient(_config.ServicesBusConnectionString, NotificationTopic);
+            _subscriptionName = device.Key.ToString();
+            _notificationTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.NotificationTopic);
             _commandSubscriptionClient =
-                new SubscriptionClient(_config.ServicesBusConnectionString, CommandTopic, _subscriptionName);
+                new SubscriptionClient(_config.ServicesBusConnectionString, _config.CommandTopic, _subscriptionName);
             await InitializeSubscription();
             InitializeReceiver();
         }
@@ -86,9 +84,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             _subscriptionManagementClient = new ManagementClient(_config.ServicesBusConnectionString);
 
-            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(CommandTopic, _subscriptionName))
+            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.CommandTopic, _subscriptionName))
             {
-                var subscription = new SubscriptionDescription(CommandTopic, _subscriptionName);
+                var subscription = new SubscriptionDescription(_config.CommandTopic, _subscriptionName);
                 await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
             }
         }
