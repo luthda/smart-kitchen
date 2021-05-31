@@ -17,7 +17,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
-        private const string TableName = "smartdevices";
 
         public AzureControlPanelDataClient(
             IDialogService dialogService,
@@ -47,7 +46,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
             var cloudTable = await GetCloudTable();
-            var tableQuery = new TableQuery<DeviceStorageAdapter>();
+            var tableQuery = new TableQuery<DeviceCloudDto>();
 
             return cloudTable.ExecuteQuery(tableQuery)
                 .Select(deviceStorageAdapter => deviceStorageAdapter.ToDevice());
@@ -56,7 +55,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private async Task<CloudTable> GetCloudTable()
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(TableName);
+            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
             await cloudTable.CreateIfNotExistsAsync();
 
             return cloudTable;

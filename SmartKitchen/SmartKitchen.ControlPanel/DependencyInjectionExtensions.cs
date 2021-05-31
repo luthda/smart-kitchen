@@ -48,7 +48,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel
             services.AddTransient(typeof(IControlPanelDataClient), typeof(AzureControlPanelDataClient));
 
             // Simulator Device Client
-            //services.AddTransient(typeof(IControlPanelMessageClient<>), typeof(ServiceBusTopicControlPanelMessageClient<>));
+           // services.AddTransient(typeof(IControlPanelMessageClient<>), typeof(AzureControlPanelMessageClient<>));
 
         }
 

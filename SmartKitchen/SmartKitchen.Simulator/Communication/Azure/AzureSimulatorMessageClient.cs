@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
 using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 {
@@ -19,8 +22,11 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
-        private TopicClient _smartTopicClient;
+        private TopicClient _notificationTopicClient;
         private SubscriptionClient _commandSubscriptionClient;
+        private ICommand<T> _command;
+        private const string CommandTopic = "commandtopic";
+        private const string NotificationTopic = "notification";
 
         public AzureSimulatorMessageClient(
             IDialogService dialogService,
@@ -36,12 +42,15 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// <param name="device">The device this client is used for.</param>
         public async Task InitAsync(T device)
         {
-            await Task.Run((() =>
+            if(device == null) throw new ArgumentNullException(nameof(device));
+
+            await Task.Run(() =>
             {
+                _notificationTopicClient = new TopicClient(_config.ServicesBusConnectionString, NotificationTopic);
                 _commandSubscriptionClient =
-                    new SubscriptionClient(_config.ServicesBusConnectionString, _config.TopicName, "commands");
-                _smartTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.TopicName);
-            }));
+                    new SubscriptionClient(_config.ServicesBusConnectionString, CommandTopic,  "commands");
+            });
+            InitializeReceiver(_commandSubscriptionClient, device);
         }
 
         /// <summary>
@@ -49,25 +58,56 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         /// </summary>
         /// <param name="device">The device to check for commands.</param>
         /// <returns>A received command or NullCommandDto&lt;T&gt;</returns>
-        public Task<ICommand<T>> CheckCommandsAsync(T device)
+        public async Task<ICommand<T>> CheckCommandsAsync(T device)
         {
-            throw new System.NotImplementedException();
+            if (device == null) return NullCommand<T>.Empty;
+
+            return await Task.Run(() => _command);
         }
 
         /// <summary>
         /// Sends a notification to the control panel.
         /// </summary>
         /// <param name="notification">The notification to send.</param>
-        public Task SendNotificationAsync(INotification<T> notification)
+        public async Task SendNotificationAsync(INotification<T> notification)
         {
-            throw new System.NotImplementedException();
+            if (notification == null) return;
+
+            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(notification)))
+            {
+                ContentType = "application/json",
+                Label = "notifications"
+            };
+
+            await _notificationTopicClient.SendAsync(message);
+        }
+
+        private void InitializeReceiver(SubscriptionClient receiverClient, T device)
+        {
+            receiverClient.RegisterMessageHandler(async (message, cancelToken) =>
+            {
+                if (message.Label != null &&
+                    message.ContentType != null &&
+                    message.Label.Equals("commands", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var body = message.Body;
+                    _command = JsonConvert.DeserializeObject<DeviceCommand<T>>(Encoding.UTF8.GetString(body));
+                    await receiverClient.CompleteAsync(message.SystemProperties.LockToken);
+                }
+            }, new MessageHandlerOptions(LogMessageHandlerException)
+            {
+                AutoComplete = false,
+                MaxConcurrentCalls = 1
+            });
         }
 
         /// <summary>
         /// Use this method to tear down established connections.
         /// </summary>
-        protected override void OnDispose()
+        protected override async void OnDispose()
         {
+            await _commandSubscriptionClient.CloseAsync();
             base.OnDispose();
         }
     }

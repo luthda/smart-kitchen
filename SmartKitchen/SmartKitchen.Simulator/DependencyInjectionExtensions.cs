@@ -48,7 +48,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator
             services.AddTransient(typeof(ISimulatorDataClient<>), typeof(AzureSimulatorDataClient<>));
 
             // Simulator DeviceState Client
-            //services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(ServiceBusTopicSimulatorMessageClient<>));
+            //services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(AzureSimulatorMessageClient<>));
         }
 
         private static void ConfigureDevices(this IServiceCollection services)

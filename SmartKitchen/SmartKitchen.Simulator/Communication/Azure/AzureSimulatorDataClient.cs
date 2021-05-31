@@ -16,7 +16,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
-        private const string TableName = "smartdevices";
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -48,7 +47,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             if (device == null) throw new ArgumentNullException(nameof(device));
 
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceStorageAdapter(device)));
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceCloudDto(device)));
         }
 
         public async Task UnregisterDeviceAsync(T device)
@@ -56,13 +55,13 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             if (device == null) throw new ArgumentNullException(nameof(device));
 
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceStorageAdapter(device)));
+            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceCloudDto(device)));
         }
 
         private async Task<CloudTable> GetCloudTable()
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(TableName);
+            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
             await cloudTable.CreateIfNotExistsAsync();
 
             return cloudTable;
