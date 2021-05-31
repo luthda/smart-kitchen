@@ -62,7 +62,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
-            await cloudTable.CreateIfNotExistsAsync();
+            if (!cloudTable.Exists())
+            {
+                await cloudTable.CreateAsync();
+            }
 
             return cloudTable;
         }
