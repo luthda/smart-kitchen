@@ -7,6 +7,7 @@ using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
 using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
@@ -23,10 +24,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
         private TopicClient _commandTopicClient;
+        private ManagementClient _subscriptionManagementClient;
         private SubscriptionClient _notificationSubscriptionClient;
         private INotification<T> _notification;
         private const string CommandTopic = "commandtopic";
-        private const string NotificationTopic = "notification";
+        private const string NotificationTopic = "notificationtopic";
+        private string _subscriptionName;
 
         public AzureControlPanelMessageClient(
             IDialogService dialogService,
@@ -42,13 +45,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <param name="device">The device this client is responsible for.</param>
         public async Task InitAsync(T device)
         {
-            await Task.Run((() =>
-            {
-                _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, CommandTopic);
-                _notificationSubscriptionClient = new SubscriptionClient(_config.ServicesBusConnectionString,
-                    NotificationTopic, "notifications");
-                InitializeReceiver(_notificationSubscriptionClient);
-            }));
+            _subscriptionName = $"notification_{device.Key}";
+            _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, CommandTopic);
+            _notificationSubscriptionClient = new SubscriptionClient(_config.ServicesBusConnectionString,
+                NotificationTopic, _subscriptionName);
+            await InitializeSubscription();
+            InitializeReceiver();
             IsInitialized = true;
         }
 
@@ -80,24 +82,35 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(command)))
             {
                 ContentType = "application/json",
-                Label = "commands",
+                Label = $"command_{command.DeviceState.Key}"
             };
 
             await _commandTopicClient.SendAsync(message);
         }
 
-        private void InitializeReceiver(SubscriptionClient receiverClient)
+        private async Task InitializeSubscription()
         {
-            receiverClient.RegisterMessageHandler(async (message, cancelToken) =>
+            _subscriptionManagementClient = new ManagementClient(_config.ServicesBusConnectionString);
+
+            if (!await _subscriptionManagementClient.SubscriptionExistsAsync(NotificationTopic, _subscriptionName))
+            {
+                var subscription = new SubscriptionDescription(NotificationTopic, _subscriptionName);
+                await _subscriptionManagementClient.CreateSubscriptionAsync(subscription);
+            }
+        }
+
+        private void InitializeReceiver()
+        {
+            _notificationSubscriptionClient.RegisterMessageHandler(async (message, cancelToken) =>
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals("notifications", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals(_subscriptionName, StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;
                     _notification = JsonConvert.DeserializeObject<DeviceNotification<T>>(Encoding.UTF8.GetString(body));
-                    await receiverClient.CompleteAsync(message.SystemProperties.LockToken);
+                    await _notificationSubscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
                 }
             }, new MessageHandlerOptions(LogMessageHandlerException)
             {
@@ -111,7 +124,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// </summary>
         protected override async void OnDispose()
         {
-            await _notificationSubscriptionClient.CloseAsync();
+            await _subscriptionManagementClient.CloseAsync();
             base.OnDispose();
         }
     }
