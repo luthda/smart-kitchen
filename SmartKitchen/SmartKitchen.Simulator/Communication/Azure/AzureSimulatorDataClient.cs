@@ -8,10 +8,6 @@ using Microsoft.Azure.Cosmos.Table;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 {
-    /// <summary>
-    /// This class is used for registration and deregistration of devices.
-    /// </summary>
-    /// <typeparam name="T">The device this client is used for.</typeparam>
     public class AzureSimulatorDataClient<T>
         : ClientBase
             , ISimulatorDataClient<T>
@@ -20,7 +16,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
-        private const string TableName = "smartdevices";
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -30,9 +25,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Establishes the connections used to talk to the Cloud.
-        /// </summary>
         public async Task InitAsync()
         {
             await Task.Run(() =>
@@ -50,42 +42,34 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Registers a <paramref name="device"/> to be used with the control panel.
-        /// </summary>
-        /// <param name="device">The device to register.</param>
         public async Task RegisterDeviceAsync(T device)
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
-            
+
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device));
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceCloudDto(device)));
         }
 
-        /// <summary>
-        /// Deregisters a <paramref name="device"/> to no longer be used with the control panel.
-        /// </summary>
-        /// <param name="device">The device to deregister.</param>
         public async Task UnregisterDeviceAsync(T device)
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
-            
+
             var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.Delete(device));
+            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceCloudDto(device)));
         }
 
         private async Task<CloudTable> GetCloudTable()
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(TableName);
-            await cloudTable.CreateIfNotExistsAsync();
+            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
+            if (!cloudTable.Exists())
+            {
+                await cloudTable.CreateAsync();
+            }
 
             return cloudTable;
         }
 
-        /// <summary>
-        /// Use this method to tear down any established connection.
-        /// </summary>
         protected override void OnDispose()
         {
             base.OnDispose();

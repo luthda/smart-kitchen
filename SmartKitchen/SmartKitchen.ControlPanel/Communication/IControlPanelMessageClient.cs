@@ -6,7 +6,7 @@ using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication
 {
     public interface IControlPanelMessageClient<T> 
-        : IDisposable 
+        : IObservable<INotification<T>>, IDisposable 
         where T : DeviceBase
     {
         Task InitAsync(T device);

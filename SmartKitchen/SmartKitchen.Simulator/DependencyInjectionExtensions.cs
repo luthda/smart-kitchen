@@ -1,5 +1,6 @@
 ﻿using System;
 using Hsr.CloudSolutions.SmartKitchen.Simulator.Communication;
+using Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure;
 using Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Grpc;
 using Hsr.CloudSolutions.SmartKitchen.Simulator.Devices;
 using Hsr.CloudSolutions.SmartKitchen.UI;
@@ -36,18 +37,18 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator
         {
             // TODO: Bind here!!!
             // If Azure support is implemented, comment this type registration since it's no longer needed
-            services.AddTransient(typeof(ISimulatorDataClient<>), typeof(GrpcSimulatorDataClient<>));
-            services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(GrpcSimulatorMessageClient<>));
+            //services.AddTransient(typeof(ISimulatorDataClient<>), typeof(GrpcSimulatorDataClient<>));
+            //services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(GrpcSimulatorMessageClient<>));
 
             // TODO: To support Azure, uncomment this type registration
 
             // Simulator Info Client
             // To support Azure, uncomment this type registration
             //services.AddTransient(typeof(ISimulatorDataClient<>), typeof(BlobSimulatorDataClient<>));
-            //services.AddTransient(typeof(ISimulatorDataClient<>), typeof(TableSimulatorDataClient<>));
+            services.AddTransient(typeof(ISimulatorDataClient<>), typeof(AzureSimulatorDataClient<>));
 
             // Simulator DeviceState Client
-            //services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(ServiceBusTopicSimulatorMessageClient<>));
+            services.AddTransient(typeof(ISimulatorMessageClient<>), typeof(AzureSimulatorMessageClient<>));
         }
 
         private static void ConfigureDevices(this IServiceCollection services)

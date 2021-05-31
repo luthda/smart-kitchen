@@ -10,17 +10,13 @@ using Microsoft.Azure.Cosmos.Table;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
-    /// <summary>
-    /// This class is used to receive the registered devices.
-    /// </summary>
-    public class AzureControlPanelDataClient 
+    public class AzureControlPanelDataClient
         : ClientBase
-        , IControlPanelDataClient
+            , IControlPanelDataClient
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
-        private const string TableName = "smartdevices";
 
         public AzureControlPanelDataClient(
             IDialogService dialogService,
@@ -30,9 +26,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Used to establish the communication.
-        /// </summary>
         public async Task InitAsync()
         {
             await Task.Run(() =>
@@ -50,30 +43,27 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Loads the registerd devices from the simulator.
-        /// </summary>
-        /// <returns>The list of all known devices.</returns>
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
             var cloudTable = await GetCloudTable();
-            var tableQuery = new TableQuery<DeviceBase>();
+            var tableQuery = new TableQuery<DeviceCloudDto>();
 
-            return cloudTable.ExecuteQuery(tableQuery);
+            return cloudTable.ExecuteQuery(tableQuery)
+                .Select(deviceStorageAdapter => deviceStorageAdapter.ToDevice());
         }
 
         private async Task<CloudTable> GetCloudTable()
         {
             var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(TableName);
-            await cloudTable.CreateIfNotExistsAsync();
+            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
+            if (!cloudTable.Exists())
+            {
+                await cloudTable.CreateAsync();
+            }
 
             return cloudTable;
         }
 
-        /// <summary>
-        /// Use this method to tear down any established connections.
-        /// </summary>
         protected override void OnDispose()
         {
             base.OnDispose();

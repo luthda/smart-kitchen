@@ -6,7 +6,7 @@ using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication
 {
     public interface ISimulatorMessageClient<T> 
-        : IDisposable
+        : IObservable<ICommand<T>>, IDisposable
         where T : DeviceBase
     {
         Task InitAsync(T device);
