@@ -76,7 +76,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(notification)))
             {
                 ContentType = "application/json",
-                Label = $"notification_{_subscriptionName}"
+                Label = "notification"
             };
             await _notificationTopicClient.SendAsync(message);
         }
