@@ -23,9 +23,9 @@ namespace DeviceFunctions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)] HttpRequest req, 
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("C# HTTP trigger function load devices.");
 
-            var cloudStorageAccount = CloudStorageAccount.Parse("AzureWebJobsStorage");
+            var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
             if (!cloudTable.Exists())
@@ -35,9 +35,9 @@ namespace DeviceFunctions
 
             var tableQuery = new TableQuery<DeviceCloudDto>();
 
-            var segment = await cloudTable.ExecuteQuerySegmentedAsync(tableQuery, null);
+            var devices = cloudTable.ExecuteQuery(tableQuery);
 
-            return new OkObjectResult(segment.Select(device => device.ToDevice()));
+            return new OkObjectResult(devices);
         }
     }
 }

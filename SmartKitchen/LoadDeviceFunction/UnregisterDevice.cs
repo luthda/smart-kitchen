@@ -22,7 +22,9 @@ namespace DeviceFunctions
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route)] HttpRequest req,
             ILogger log)
         {
-            var cloudStorageAccount = CloudStorageAccount.Parse("AzureWebJobsStorage");
+            log.LogInformation("C# HTTP trigger function unregister device");
+
+            var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
             if (!cloudTable.Exists())
@@ -38,7 +40,7 @@ namespace DeviceFunctions
                 return new NotFoundObjectResult(nameof(device));
             }
 
-            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceCloudDto(device)));
+            await cloudTable.ExecuteAsync(TableOperation.Delete(device));
 
 
             return new NoContentResult();

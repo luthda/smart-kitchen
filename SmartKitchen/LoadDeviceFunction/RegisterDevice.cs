@@ -22,9 +22,9 @@ namespace DeviceFunctions
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = Route)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP post put trigger device function");
+            log.LogInformation("C# HTTP trigger function register device");
 
-            var cloudStorageAccount = CloudStorageAccount.Parse("AzureWebJobsStorage");
+            var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
             if (!cloudTable.Exists())
@@ -40,7 +40,7 @@ namespace DeviceFunctions
                 return new NotFoundObjectResult(nameof(device));
             }
 
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceCloudDto(device)));
+            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(device));
 
             return new OkObjectResult(device);
         }
