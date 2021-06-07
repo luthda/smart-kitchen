@@ -28,6 +28,7 @@ namespace DeviceFunctions
             var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
+
             if (!cloudTable.Exists())
             {
                 await cloudTable.CreateAsync();

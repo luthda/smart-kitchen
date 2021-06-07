@@ -27,13 +27,14 @@ namespace DeviceFunctions
             var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
+
             if (!cloudTable.Exists())
             {
                 await cloudTable.CreateAsync();
             }
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic device = JsonConvert.DeserializeObject(requestBody);
+            dynamic device = JsonConvert.DeserializeObject<DeviceCloudDto>(requestBody);
 
             if (device == null)
             {
