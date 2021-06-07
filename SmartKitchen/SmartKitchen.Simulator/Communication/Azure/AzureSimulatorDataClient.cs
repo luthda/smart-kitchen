@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
-using Microsoft.Azure.Cosmos.Table;
+using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 {
@@ -15,7 +17,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
         private readonly SmartKitchenConfiguration _config;
-        private CloudStorageAccount _cloudStorageAccount;
+        private HttpClient _httpClient;
 
         public AzureSimulatorDataClient(
             IDialogService dialogService,
@@ -29,16 +31,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             await Task.Run(() =>
             {
-                try
+                _httpClient = new HttpClient()
                 {
-                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine(
-                        "Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
-                    throw;
-                }
+                    BaseAddress = new Uri(_config.DeviceFunctionsString)
+                };
             });
         }
 
@@ -46,28 +42,29 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.InsertOrReplace(new DeviceCloudDto(device)));
+            var postRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen/", device);
+
+            var response = await _httpClient.SendAsync(postRequest);
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task UnregisterDeviceAsync(T device)
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var cloudTable = await GetCloudTable();
-            await cloudTable.ExecuteAsync(TableOperation.Delete(new DeviceCloudDto(device)));
+            var deleteRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen/", device);
+
+            var response = await _httpClient.SendAsync(deleteRequest);
+            response.EnsureSuccessStatusCode();
         }
 
-        private async Task<CloudTable> GetCloudTable()
+        private HttpRequestMessage CreateHttpRequest(HttpMethod method, string requestUri, T device)
         {
-            var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
-            if (!cloudTable.Exists())
-            {
-                await cloudTable.CreateAsync();
-            }
+            var request = new HttpRequestMessage(method, requestUri);
+            var serializeContent = new StringContent(JsonConvert.SerializeObject(new DeviceCloudDto(device)), Encoding.UTF8, "application/json");
+            request.Content = serializeContent;
 
-            return cloudTable;
+            return request;
         }
 
         protected override void OnDispose()
