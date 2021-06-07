@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ControlPanel", "ControlPane
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{A242C373-3748-470A-9778-1F1ECA097573}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartKitchen.ControlPanel", "SmartKitchen.ControlPanel\SmartKitchen.ControlPanel.csproj", "{D28BBE41-F939-45EB-8E33-117780F9F428}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartKitchen.ControlPanel", "SmartKitchen.ControlPanel\SmartKitchen.ControlPanel.csproj", "{D28BBE41-F939-45EB-8E33-117780F9F428}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartKitchen.Simulator", "SmartKitchen.Simulator\SmartKitchen.Simulator.csproj", "{2CABCEC7-C14E-4753-8098-04B42950EA14}"
 EndProject
@@ -28,6 +28,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{E91A2539-ECE7-490D-87AF-AA13719C6AC6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartKitchen.Service.Utils", "SmartKitchen.Service.Utils\SmartKitchen.Service.Utils.csproj", "{06D207C7-2879-4E5B-9F8D-49856A158B47}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Functions", "Functions", "{C43AABB3-EBB2-437A-BE91-A5F3A42254AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceFunctions", "LoadDeviceFunction\DeviceFunctions.csproj", "{2A18CF0F-0452-4A60-AD64-9F545F690FF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +75,10 @@ Global
 		{06D207C7-2879-4E5B-9F8D-49856A158B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06D207C7-2879-4E5B-9F8D-49856A158B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06D207C7-2879-4E5B-9F8D-49856A158B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A18CF0F-0452-4A60-AD64-9F545F690FF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A18CF0F-0452-4A60-AD64-9F545F690FF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A18CF0F-0452-4A60-AD64-9F545F690FF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A18CF0F-0452-4A60-AD64-9F545F690FF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +93,7 @@ Global
 		{28722B4D-5256-4C9D-8069-BF814EDE7A4E} = {A242C373-3748-470A-9778-1F1ECA097573}
 		{4C1D5D85-52EA-4907-8E68-33954A133056} = {7E02E05B-88EF-456F-8A18-DA2017B41B3D}
 		{06D207C7-2879-4E5B-9F8D-49856A158B47} = {E91A2539-ECE7-490D-87AF-AA13719C6AC6}
+		{2A18CF0F-0452-4A60-AD64-9F545F690FF9} = {C43AABB3-EBB2-437A-BE91-A5F3A42254AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {649B9E71-49B9-46D9-B795-278E781E5ECB}
