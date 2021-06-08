@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Simulator.Common.Devices;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Google.Protobuf.Reflection;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;

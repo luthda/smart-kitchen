@@ -1,0 +1,7 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=smartcosmosacc;AccountKey=3FcLV2UvTlMK8tqJjAyab8isHQIbJtmTrmlHWgnhZY25AogiwPRUFHb1CwoDLHpmSeWE0HqhRxV5KMLy9KCObA==;TableEndpoint=https://smartcosmosacc.table.cosmos.azure.com:443/;",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}
