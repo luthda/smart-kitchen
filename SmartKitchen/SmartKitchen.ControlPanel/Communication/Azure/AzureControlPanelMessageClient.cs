@@ -45,7 +45,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         /// <param name="device">The device this client is responsible for.</param>
         public async Task InitAsync(T device)
         {
-            _subscriptionName = device.Key.ToString();
+            _subscriptionName = "notification";
             _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.CommandTopic);
             _notificationSubscriptionClient = new SubscriptionClient(_config.ServicesBusConnectionString,
                 _config.NotificationTopic, _subscriptionName);
@@ -82,7 +82,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(command)))
             {
                 ContentType = "application/json",
-                Label = $"command_{_subscriptionName}"
+                Label = $"command_{command.DeviceState.Key}"
             };
 
             await _commandTopicClient.SendAsync(message);
@@ -95,7 +95,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic,
                 _subscriptionName))
             {
-                var rule = new RuleDescription("DeviceFilter", new SqlFilter($"sys.Label = 'notification_{_subscriptionName}'"));
+                var rule = new RuleDescription("DeviceFilter", new SqlFilter("sys.Label = 'notification'"));
                 var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName)
                 {
                     DefaultMessageTimeToLive = new TimeSpan(1, 0, 0, 0), MaxDeliveryCount = 100
@@ -110,7 +110,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals($"notification_{_subscriptionName}", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals("notification", StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;

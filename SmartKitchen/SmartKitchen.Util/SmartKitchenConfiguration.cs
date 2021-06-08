@@ -13,6 +13,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Util
         public string CloudTableName { get; set; }
         public string NotificationTopic { get; set; }
         public string CommandTopic { get; set; }
+
+        public string DeviceFunctionsString { get; set; }
     }
 
     public static class SmartKitchenConfigurationExtensions

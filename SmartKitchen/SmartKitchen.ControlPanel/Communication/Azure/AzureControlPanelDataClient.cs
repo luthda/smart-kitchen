@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.UI;
 using Hsr.CloudSolutions.SmartKitchen.UI.Communication;
 using Hsr.CloudSolutions.SmartKitchen.Util;
-using Microsoft.Azure.Cosmos.Table;
+using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
@@ -16,7 +17,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
     {
         private readonly IDialogService _dialogService; // Can display exception in a dialog.
         private readonly SmartKitchenConfiguration _config;
-        private CloudStorageAccount _cloudStorageAccount;
+        private HttpClient _httpClient;
 
         public AzureControlPanelDataClient(
             IDialogService dialogService,
@@ -30,38 +31,28 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         {
             await Task.Run(() =>
             {
-                try
+                _httpClient = new HttpClient()
                 {
-                    _cloudStorageAccount = CloudStorageAccount.Parse(_config.StorageConnectionString);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine(
-                        "Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the application.");
-                    throw;
-                }
+                    BaseAddress = new Uri(_config.DeviceFunctionsString)
+                };
             });
         }
 
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
-            var cloudTable = await GetCloudTable();
-            var tableQuery = new TableQuery<DeviceCloudDto>();
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, "api/smartkitchen");
 
-            return cloudTable.ExecuteQuery(tableQuery)
-                .Select(deviceStorageAdapter => deviceStorageAdapter.ToDevice());
+            var response = await _httpClient.SendAsync(getRequest);
+
+            return await DeserializeResponseContent(response);
         }
 
-        private async Task<CloudTable> GetCloudTable()
+        private async Task<IEnumerable<DeviceBase>> DeserializeResponseContent(HttpResponseMessage response)
         {
-            var tableClient = _cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(_config.CloudTableName);
-            if (!cloudTable.Exists())
-            {
-                await cloudTable.CreateAsync();
-            }
+            var stringContent = await response.Content.ReadAsStringAsync();
 
-            return cloudTable;
+            return JsonConvert.DeserializeObject<IEnumerable<DeviceCloudDto>>(stringContent)
+                .Select(device => device.FromDto());
         }
 
         protected override void OnDispose()

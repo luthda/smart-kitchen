@@ -7,7 +7,7 @@ using Hsr.CloudSolutions.SmartKitchen.Simulator.Communication;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Devices
 {
-    public class SimulatorDeviceController<T> 
+    public class SimulatorDeviceController<T>
         : IObserver<ICommand<T>>, IDeviceController<T>
         where T : DeviceBase
     {
@@ -17,12 +17,11 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Devices
         private readonly ISimulatorMessageClient<T> _messageClient;
 
         public SimulatorDeviceController(
-            ISimulatorDataClient<T> dataClient, 
+            ISimulatorDataClient<T> dataClient,
             ISimulatorMessageClient<T> messageClient)
         {
             _dataClient = dataClient;
             _messageClient = messageClient;
-            
         }
 
         private T _dto;
@@ -74,6 +73,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Devices
             {
                 return;
             }
+
             CommandReceived?.Invoke(this, command);
         }
     }
