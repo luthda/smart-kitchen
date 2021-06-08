@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.Devices
@@ -23,7 +22,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
             RowKey = device.Id.ToString();
             PartitionKey = device.Key.ToString();
         }
-        public DeviceBase ToDevice()
+
+        public DeviceBase FromDto()
         {
             return JsonConvert.DeserializeObject<DeviceBase>(JsonObject, _jsonSettings);
         }

@@ -52,7 +52,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var stringContent = await response.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<IEnumerable<DeviceCloudDto>>(stringContent)
-                .Select(device => device.ToDevice());
+                .Select(device => device.FromDto());
         }
 
         protected override void OnDispose()
