@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
@@ -40,7 +41,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
-            var getRequest = new HttpRequestMessage(HttpMethod.Get, "api/smartkitchen/");
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, "api/smartkitchen");
 
             var response = await _httpClient.SendAsync(getRequest);
 
@@ -50,7 +51,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private async Task<IEnumerable<DeviceBase>> DeserializeResponseContent(HttpResponseMessage response)
         {
             var stringContent = await response.Content.ReadAsStringAsync();
-            var devices = JsonConvert.DeserializeObject<IEnumerable<DeviceBase>>(stringContent);
+            var devices = JsonConvert.DeserializeObject<IEnumerable<DeviceCloudDto>>(stringContent)
+                .Select(device => device.ToDevice());
 
             return devices;
         }

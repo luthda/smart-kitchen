@@ -12,6 +12,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
 
         public string JsonObject { get; set; }
 
+        public DeviceCloudDto()
+        {
+        }
+
         public DeviceCloudDto(DeviceBase device)
         {
             JsonObject = device.ToString();
@@ -20,7 +24,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
         }
         public DeviceBase ToDevice()
         {
-            return JsonConvert.DeserializeObject<DeviceBase>(JsonObject, _jsonSettings);
+            var device = JsonConvert.DeserializeObject<DeviceBase>(JsonObject);
+            return device;
         }
     }
 }

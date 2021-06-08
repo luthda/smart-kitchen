@@ -42,7 +42,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var putRequst = CreateHttpRequest(HttpMethod.Put, "/smartkitchen", device);
+            var putRequst = CreateHttpRequest(HttpMethod.Put, "api/smartkitchen", device);
 
             Console.WriteLine(putRequst.RequestUri);
             Console.WriteLine(_httpClient.BaseAddress);
@@ -55,7 +55,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var deleteRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen", device);
+            var deleteRequest = CreateHttpRequest(HttpMethod.Delete, "api/smartkitchen", device);
 
             var response = await _httpClient.SendAsync(deleteRequest);
             response.EnsureSuccessStatusCode();
