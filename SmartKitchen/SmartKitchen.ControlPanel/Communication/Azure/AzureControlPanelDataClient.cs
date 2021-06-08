@@ -51,8 +51,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private async Task<IEnumerable<DeviceBase>> DeserializeResponseContent(HttpResponseMessage response)
         {
             var stringContent = await response.Content.ReadAsStringAsync();
-            var devices = JsonConvert.DeserializeObject<IEnumerable<DeviceCloudDto>>(stringContent)
-                .Select(device => device.ToDevice());
+            var devicesCloudDtos = JsonConvert.DeserializeObject<IEnumerable<DeviceCloudDto>>(stringContent);
+            var devices = new List<DeviceBase>();
+            foreach (var deviceCloudDto in devicesCloudDtos)
+            {
+                devices.Add(deviceCloudDto.ToDevice());
+            }
 
             return devices;
         }

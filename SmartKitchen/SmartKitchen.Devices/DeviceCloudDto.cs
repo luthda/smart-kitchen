@@ -18,14 +18,13 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
 
         public DeviceCloudDto(DeviceBase device)
         {
-            JsonObject = device.ToString();
+            JsonObject = JsonConvert.SerializeObject(device, _jsonSettings);
             RowKey = device.Id.ToString();
             PartitionKey = device.Key.ToString();
         }
         public DeviceBase ToDevice()
         {
-            var device = JsonConvert.DeserializeObject<DeviceBase>(JsonObject);
-            return device;
+            return JsonConvert.DeserializeObject<DeviceBase>(JsonObject);
         }
     }
 }
