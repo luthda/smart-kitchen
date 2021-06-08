@@ -7,7 +7,8 @@ using Hsr.CloudSolutions.SmartKitchen.UI.ViewModels;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
 {
-    public abstract class BaseDeviceControllerViewModel<T> : BaseViewModel, IDeviceControllerViewModel<T>, IObserver<INotification<T>>
+    public abstract class BaseDeviceControllerViewModel<T> : BaseViewModel, IDeviceControllerViewModel<T>,
+        IObserver<INotification<T>>
         where T : DeviceBase, new()
     {
         private readonly IControlPanelMessageClient<T> _client;
@@ -29,6 +30,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
         protected T Device { get; private set; }
 
         private DeviceKey _key;
+
         protected DeviceKey Key
         {
             get => _key;
@@ -40,6 +42,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
         }
 
         private Guid _id;
+
         public Guid Id
         {
             get => _id;
@@ -49,6 +52,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
                 {
                     return;
                 }
+
                 _id = value;
                 OnPropertyChanged(nameof(Id));
             }
@@ -60,6 +64,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             {
                 return false;
             }
+
             return Key.Equals(device.Key);
         }
 
@@ -84,6 +89,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             {
                 return;
             }
+
             var deviceCommand = new DeviceCommand<T>(ToDevice(), command);
             await _client.SendCommandAsync(deviceCommand);
         }
@@ -95,6 +101,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             {
                 throw new InvalidOperationException("This controller is not responsible for the update.");
             }
+
             OnUpdate(update);
         }
 
@@ -132,6 +139,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.ViewModels
             {
                 return;
             }
+
             Update(notification.DeviceState);
         }
     }
