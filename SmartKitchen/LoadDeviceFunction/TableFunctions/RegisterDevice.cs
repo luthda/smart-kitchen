@@ -1,21 +1,21 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using DeviceFunctions.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SmartKitchen.Functions.Models;
+using SmartKitchen.Functions.Utils;
 
-namespace DeviceFunctions
+namespace SmartKitchen.Functions.TableFunctions
 {
     public static class RegisterDevice
     {
         private const string Route = "smartkitchen";
-        private const string TableName = "smartdevices";
 
         [FunctionName("RegisterDevice")]
         public static async Task<IActionResult> Run(
@@ -24,14 +24,7 @@ namespace DeviceFunctions
         {
             log.LogInformation("C# HTTP trigger function register device");
 
-            var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
-            var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var cloudTable = tableClient.GetTableReference(TableName);
-
-            if (!cloudTable.Exists())
-            {
-                await cloudTable.CreateAsync();
-            }
+            var cloudTable = await CloudTableUtil.GetCloudTable();
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic device = JsonConvert.DeserializeObject<DeviceCloudDto>(requestBody);

@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartKitchen.Service.Utils"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Functions", "Functions", "{C43AABB3-EBB2-437A-BE91-A5F3A42254AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceFunctions", "LoadDeviceFunction\DeviceFunctions.csproj", "{2A18CF0F-0452-4A60-AD64-9F545F690FF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartKitchen.Functions", "LoadDeviceFunction\SmartKitchen.Functions.csproj", "{2A18CF0F-0452-4A60-AD64-9F545F690FF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

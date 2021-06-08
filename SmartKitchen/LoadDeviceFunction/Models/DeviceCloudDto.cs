@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json;
 
-namespace DeviceFunctions.Models
+namespace SmartKitchen.Functions.Models
 {
     public class DeviceCloudDto : TableEntity
     {
