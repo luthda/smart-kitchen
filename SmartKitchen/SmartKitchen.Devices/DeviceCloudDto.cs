@@ -12,17 +12,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
 
         public string JsonObject { get; set; }
 
-        public DeviceCloudDto()
-        {
-        }
-
         public DeviceCloudDto(DeviceBase device)
         {
-            JsonObject = JsonConvert.SerializeObject(device, _jsonSettings);
+            JsonObject = device.ToString();
             RowKey = device.Id.ToString();
             PartitionKey = device.Key.ToString();
         }
-
         public DeviceBase ToDevice()
         {
             return JsonConvert.DeserializeObject<DeviceBase>(JsonObject, _jsonSettings);

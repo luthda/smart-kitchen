@@ -40,10 +40,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 
         public async Task<IEnumerable<DeviceBase>> LoadDevicesAsync()
         {
-            var getRequest = new HttpRequestMessage(HttpMethod.Get, "/smartkitchen/");
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, "api/smartkitchen/");
 
             var response = await _httpClient.SendAsync(getRequest);
-            response.EnsureSuccessStatusCode();
 
             return await DeserializeResponseContent(response);
         }
@@ -51,8 +50,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         private async Task<IEnumerable<DeviceBase>> DeserializeResponseContent(HttpResponseMessage response)
         {
             var stringContent = await response.Content.ReadAsStringAsync();
+            var devices = JsonConvert.DeserializeObject<IEnumerable<DeviceBase>>(stringContent);
 
-            return JsonConvert.DeserializeObject<IEnumerable<DeviceBase>>(stringContent);
+            return devices;
         }
 
         protected override void OnDispose()

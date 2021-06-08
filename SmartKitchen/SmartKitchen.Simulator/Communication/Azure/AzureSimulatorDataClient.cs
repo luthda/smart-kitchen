@@ -42,9 +42,12 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var postRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen/", device);
+            var putRequst = CreateHttpRequest(HttpMethod.Put, "/smartkitchen", device);
 
-            var response = await _httpClient.SendAsync(postRequest);
+            Console.WriteLine(putRequst.RequestUri);
+            Console.WriteLine(_httpClient.BaseAddress);
+            Console.WriteLine(putRequst.Content);
+            var response = await _httpClient.SendAsync(putRequst);
             response.EnsureSuccessStatusCode();
         }
 
@@ -52,7 +55,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            var deleteRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen/", device);
+            var deleteRequest = CreateHttpRequest(HttpMethod.Delete, "/smartkitchen", device);
 
             var response = await _httpClient.SendAsync(deleteRequest);
             response.EnsureSuccessStatusCode();
@@ -61,7 +64,10 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
         private HttpRequestMessage CreateHttpRequest(HttpMethod method, string requestUri, T device)
         {
             var request = new HttpRequestMessage(method, requestUri);
-            var serializeContent = new StringContent(JsonConvert.SerializeObject(new DeviceCloudDto(device)), Encoding.UTF8, "application/json");
+            var clouddevice = new DeviceCloudDto(device);
+            Console.WriteLine(clouddevice);
+            var serializeContent = new StringContent(JsonConvert.SerializeObject(clouddevice), Encoding.UTF8, "application/json");
+           
             request.Content = serializeContent;
 
             return request;
