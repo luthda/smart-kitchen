@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +18,7 @@ namespace SmartKitchen.Functions.TableFunctions
 
         [FunctionName("RegisterDevice")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = Route)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function register device");

@@ -14,7 +14,6 @@ namespace SmartKitchen.Functions.TableFunctions
     public static class LoadDevices
     {
         private const string Route = "smartkitchen";
-        private const string TableName = "smartdevices";
 
         [FunctionName("LoadDevices")]
         public static async Task<IActionResult> Run(

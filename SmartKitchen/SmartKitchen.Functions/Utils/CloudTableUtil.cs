@@ -10,7 +10,8 @@ namespace SmartKitchen.Functions.Utils
 
         public static async Task<CloudTable> GetCloudTable()
         {
-            var cloudStorageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
+            var cloudStorageAccount =
+                CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
             var tableClient = cloudStorageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var cloudTable = tableClient.GetTableReference(TableName);
 
