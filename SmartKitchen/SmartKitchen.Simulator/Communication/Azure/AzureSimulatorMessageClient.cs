@@ -126,7 +126,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             return new Unsubscriber(_observers, observer);
         }
 
-
         private class Unsubscriber : IDisposable
         {
             private IList<IObserver<ICommand<T>>> _observers;
