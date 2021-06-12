@@ -23,7 +23,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Devices
             PartitionKey = device.Key.ToString();
         }
 
-        public DeviceBase ToDevice()
+        public DeviceBase FromDto()
         {
             return JsonConvert.DeserializeObject<DeviceBase>(JsonObject, _jsonSettings);
         }

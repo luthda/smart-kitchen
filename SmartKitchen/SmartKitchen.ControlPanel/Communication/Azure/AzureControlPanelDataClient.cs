@@ -49,7 +49,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var tableQuery = new TableQuery<DeviceCloudDto>();
 
             return cloudTable.ExecuteQuery(tableQuery)
-                .Select(deviceStorageAdapter => deviceStorageAdapter.ToDevice());
+                .Select(deviceStorageAdapter => deviceStorageAdapter.FromDto());
         }
 
         private async Task<CloudTable> GetCloudTable()

@@ -39,10 +39,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Establishes the connections used to talk to the Cloud.
-        /// </summary>
-        /// <param name="device">The device this client is used for.</param>
         public async Task InitAsync(T device)
         {
             _subscriptionName = device.Key.ToString();
@@ -53,11 +49,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             InitializeReceiver();
         }
 
-        /// <summary>
-        /// Checks if a command should be executed.
-        /// </summary>
-        /// <param name="device">The device to check for commands.</param>
-        /// <returns>A received command or NullCommandDto&lt;T&gt;</returns>
         public async Task<ICommand<T>> CheckCommandsAsync(T device)
         {
             if (device == null || _command == null) return NullCommand<T>.Empty;
@@ -65,10 +56,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             return await Task.Run(() => _command);
         }
 
-        /// <summary>
-        /// Sends a notification to the control panel.
-        /// </summary>
-        /// <param name="notification">The notification to send.</param>
         public async Task SendNotificationAsync(INotification<T> notification)
         {
             if (notification == null) return;
@@ -76,7 +63,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(notification)))
             {
                 ContentType = "application/json",
-                Label = $"notification_{_subscriptionName}"
+                Label = "notification"
             };
             await _notificationTopicClient.SendAsync(message);
         }
@@ -87,7 +74,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
 
             if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.CommandTopic, _subscriptionName))
             {
-                var rule = new RuleDescription("DeviceFilter", new SqlFilter($"sys.Label = 'command_{_subscriptionName}'"));
+                var rule = new RuleDescription("DeviceFilter",
+                    new SqlFilter($"sys.Label = 'command_{_subscriptionName}'"));
                 var subscription = new SubscriptionDescription(_config.CommandTopic, _subscriptionName)
                 {
                     DefaultMessageTimeToLive = new TimeSpan(1, 0, 0, 0),
@@ -128,9 +116,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Use this method to tear down established connections.
-        /// </summary>
         protected override async void OnDispose()
         {
             await _notificationTopicClient.CloseAsync();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Google.Protobuf.Reflection;
 using Hsr.CloudSolutions.SmartKitchen.Devices;
 using Hsr.CloudSolutions.SmartKitchen.Devices.Communication;
 using Hsr.CloudSolutions.SmartKitchen.UI;
@@ -14,10 +13,6 @@ using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
-    /// <summary>
-    /// This class is used to send commands to devices and for receiving their notifications.
-    /// </summary>
-    /// <typeparam name="T">The type of DeviceBase this client is used for.</typeparam>
     public class AzureControlPanelMessageClient<T>
         : ClientBase
             , IControlPanelMessageClient<T>
@@ -40,13 +35,9 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Used to establish the communication.
-        /// </summary>
-        /// <param name="device">The device this client is responsible for.</param>
         public async Task InitAsync(T device)
         {
-            _subscriptionName = device.Key.ToString();
+            _subscriptionName = "notification";
             _commandTopicClient = new TopicClient(_config.ServicesBusConnectionString, _config.CommandTopic);
             _notificationSubscriptionClient = new SubscriptionClient(_config.ServicesBusConnectionString,
                 _config.NotificationTopic, _subscriptionName);
@@ -55,16 +46,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             IsInitialized = true;
         }
 
-        /// <summary>
-        /// True if InitAsync was called and client is initialized.
-        /// </summary>
         public bool IsInitialized { get; private set; } = false;
 
-        /// <summary>
-        /// Checks if a notification for the <paramref name="device" /> is pending.
-        /// </summary>
-        /// <param name="device">The device to check notifications for.</param>
-        /// <returns>A received notification or NullNotification&lt;T&gt;</returns>
         public async Task<INotification<T>> CheckNotificationsAsync(T device)
         {
             if (device == null || _notification == null) return NullNotification<T>.Empty;
@@ -72,10 +55,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             return await Task.Run(() => _notification);
         }
 
-        /// <summary>
-        /// Send a command to the simulator.
-        /// </summary>
-        /// <param name="command">Command to send</param>
         public async Task SendCommandAsync(ICommand<T> command)
         {
             if (command == null) return;
@@ -83,7 +62,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(command)))
             {
                 ContentType = "application/json",
-                Label = $"command_{_subscriptionName}"
+                Label = $"command_{command.DeviceState.Key}"
             };
 
             await _commandTopicClient.SendAsync(message);
@@ -96,7 +75,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             if (!await _subscriptionManagementClient.SubscriptionExistsAsync(_config.NotificationTopic,
                 _subscriptionName))
             {
-                var rule = new RuleDescription("DeviceFilter", new SqlFilter($"sys.Label = 'notification_{_subscriptionName}'"));
+                var rule = new RuleDescription("DeviceFilter",
+                    new SqlFilter("sys.Label = 'notification'"));
                 var subscription = new SubscriptionDescription(_config.NotificationTopic, _subscriptionName)
                 {
                     DefaultMessageTimeToLive = new TimeSpan(1, 0, 0, 0), MaxDeliveryCount = 100
@@ -111,7 +91,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             {
                 if (message.Label != null &&
                     message.ContentType != null &&
-                    message.Label.Equals($"notification_{_subscriptionName}", StringComparison.InvariantCultureIgnoreCase) &&
+                    message.Label.Equals("notification",
+                        StringComparison.InvariantCultureIgnoreCase) &&
                     message.ContentType.Equals("application/json", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var body = message.Body;
@@ -136,9 +117,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Use this method to tear down any established connections.
-        /// </summary>
         protected override async void OnDispose()
         {
             await _commandTopicClient.CloseAsync();
