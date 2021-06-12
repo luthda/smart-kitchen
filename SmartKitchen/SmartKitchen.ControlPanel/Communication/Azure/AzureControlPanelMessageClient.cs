@@ -18,7 +18,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             , IControlPanelMessageClient<T>
         where T : DeviceBase
     {
-        private readonly IDialogService _dialogService; // Can display exception in a dialog.
+        private readonly IDialogService _dialogService;
         private readonly SmartKitchenConfiguration _config;
         private TopicClient _commandTopicClient;
         private ManagementClient _subscriptionManagementClient;

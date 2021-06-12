@@ -13,7 +13,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.Simulator.Communication.Azure
             , ISimulatorDataClient<T>
         where T : DeviceBase
     {
-        private readonly IDialogService _dialogService; // Can be used to display dialogs when exceptions occur.
+        private readonly IDialogService _dialogService;
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
 

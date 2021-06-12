@@ -14,7 +14,7 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
         : ClientBase
             , IControlPanelDataClient
     {
-        private readonly IDialogService _dialogService; // Can display exception in a dialog.
+        private readonly IDialogService _dialogService;
         private readonly SmartKitchenConfiguration _config;
         private CloudStorageAccount _cloudStorageAccount;
 
