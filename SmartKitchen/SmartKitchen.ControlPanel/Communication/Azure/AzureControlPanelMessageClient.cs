@@ -13,16 +13,12 @@ using Newtonsoft.Json;
 
 namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
 {
-    /// <summary>
-    /// This class is used to send commands to devices and for receiving their notifications.
-    /// </summary>
-    /// <typeparam name="T">The type of DeviceBase this client is used for.</typeparam>
     public class AzureControlPanelMessageClient<T>
         : ClientBase
             , IControlPanelMessageClient<T>
         where T : DeviceBase
     {
-        private readonly IDialogService _dialogService; // Can display exception in a dialog.
+        private readonly IDialogService _dialogService;
         private readonly SmartKitchenConfiguration _config;
         private TopicClient _commandTopicClient;
         private ManagementClient _subscriptionManagementClient;
@@ -39,10 +35,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             _config = config;
         }
 
-        /// <summary>
-        /// Used to establish the communication.
-        /// </summary>
-        /// <param name="device">The device this client is responsible for.</param>
         public async Task InitAsync(T device)
         {
             _subscriptionName = "notification";
@@ -54,16 +46,8 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             IsInitialized = true;
         }
 
-        /// <summary>
-        /// True if InitAsync was called and client is initialized.
-        /// </summary>
         public bool IsInitialized { get; private set; } = false;
 
-        /// <summary>
-        /// Checks if a notification for the <paramref name="device" /> is pending.
-        /// </summary>
-        /// <param name="device">The device to check notifications for.</param>
-        /// <returns>A received notification or NullNotification&lt;T&gt;</returns>
         public async Task<INotification<T>> CheckNotificationsAsync(T device)
         {
             if (device == null || _notification == null) return NullNotification<T>.Empty;
@@ -71,10 +55,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             return await Task.Run(() => _notification);
         }
 
-        /// <summary>
-        /// Send a command to the simulator.
-        /// </summary>
-        /// <param name="command">Command to send</param>
         public async Task SendCommandAsync(ICommand<T> command)
         {
             if (command == null) return;
@@ -135,9 +115,6 @@ namespace Hsr.CloudSolutions.SmartKitchen.ControlPanel.Communication.Azure
             });
         }
 
-        /// <summary>
-        /// Use this method to tear down any established connections.
-        /// </summary>
         protected override async void OnDispose()
         {
             await _commandTopicClient.CloseAsync();
